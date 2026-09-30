@@ -57,7 +57,7 @@
     },
     "ovhcloud": {
       "options": {
-        "apiKey": "not-required",
+        "apiKey": "not-required", // OVH AI Endpoints accepts any placeholder; no secret involved.
         "baseURL": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1"
       },
       "models": {
@@ -102,22 +102,22 @@
       },
       "models": {
         "auto": {
-          "name": "Auto - balanced best free route"
+          "name": "Auto — balanced best free route"
         },
         "auto/coding": {
-          "name": "Auto Coding - quality-first"
+          "name": "Auto Coding — quality-first"
         },
         "auto/fast": {
-          "name": "Auto Fast - speed-first"
+          "name": "Auto Fast — speed-first"
         },
         "auto/cheap": {
-          "name": "Auto Cheap - free-first"
+          "name": "Auto Cheap — free-first"
         },
         "auto/smart": {
-          "name": "Auto Smart - quality + explore"
+          "name": "Auto Smart — quality + explore"
         },
         "auto/offline": {
-          "name": "Auto Offline - most capacity"
+          "name": "Auto Offline — most capacity"
         }
       }
     }
@@ -160,6 +160,16 @@
       "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
       "enabled": true
     },
+    // james-memory disabled: MongoDB-backed memory server never connected (no MONGODB_URI)
+    // and was never used. Re-enable by uncommenting and supplying an Atlas URI first.
+    // "james-memory": {
+    //   "type": "local",
+    //   "command": ["npx", "-y", "@jamesanz/memory-mcp"],
+    //   "enabled": true,
+    //   "environment": {
+    //     "MONGODB_URI": "{env:MONGODB_URI}"
+    //   }
+    // },
     "supabase": {
       "type": "remote",
       "url": "https://mcp.supabase.com/mcp",
