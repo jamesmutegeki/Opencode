@@ -1,23 +1,45 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "notifications" : false, // Disables opencode's built-in TUI toast ONLY. Desktop notifications,
-                          // terminal title, and cmux status are driven separately by
-                          // profiles/ws/plugins/notify.ts, configured in kdco-notify.json.
-                          // See kdco-notify.json for the authoritative notify settings.
+  // REMOVED: "notifications": false
+  // That key does not exist in the opencode.json schema ($defs.Config declares
+  // additionalProperties: false and has no "notifications" property), and
+  // ConfigParse.schema decodes with onExcessProperty:"ignore" — so it was parsed,
+  // silently thrown away, and never did anything. TUI attention/notifications are
+  // configured in tui.json instead:
+  //   { "$schema": "https://opencode.ai/tui.json", "attention": { "enabled": false } }
+  // ("attention" is already disabled by default.) Desktop notifications, terminal
+  // title, and cmux status remain driven separately by profiles/ws/plugins/notify.ts
+  // via kdco-notify.json.
   "default_agent": "build",
+  // "shell" — MISSING until now. On Windows the bash tool falls back to %COMSPEC%
+  // (cmd.exe) and shell mode (!) falls back to process.env.SHELL ?? "bash", which is
+  // why "shell" and "bash" behave erratically: if SHELL is unset it tries to spawn a
+  // bare `bash` that usually is not on PATH, and if SHELL points at WSL bash the
+  // Windows environment (PATH, npm, python...) is not inherited.
+  // Verify your bash path with `where bash` in cmd, then uncomment ONE of these:
+  // "shell": "C:\\Program Files\\Git\\bin\\bash.exe",
+  // "shell": "pwsh",
+  // Equivalent env override: OPENCODE_GIT_BASH_PATH
+  // SINGLE SOURCE OF TRUTH for agent capabilities.
+  // This top-level block is the default policy for EVERY agent. A per-agent
+  // `permission` block overrides it; an agent's `tools` block only decides whether
+  // a tool is exposed at all. Both layers must agree, so keep them consistent:
+  //   tools.bash = false -> bash hidden regardless of permission
+  //   tools.bash = true  -> bash visible, gated by the permission rules below
+  // Read-only research agents should set tools.bash = false and rely on glob/grep/read.
+  // The profiles/ws overlay applies tighter per-role allowlists (plan/build/coder/
+  // explore/researcher); those are deliberately stricter and are the intended policy
+  // when running under that profile.
+  //
+  // The note above USED to be a JSON key: "_comment": [ ...array of strings... ].
+  // That is illegal. PermissionConfig is StructWithRest(Struct({...known keys...}),
+  // [Record(String, PermissionRuleConfig)]) -- every extra key must be "ask"|"allow"|"deny"
+  // or an object of pattern -> action. An array is neither, so the whole file failed to
+  // decode. `opencode debug config` reports:
+  //   Configuration is invalid at .../opencode.json
+  //   ↳ Expected PermissionRuleConfig, got [...] permission._comment
+  // Keep notes like this as // comments, never as JSON keys.
   "permission": {
-    "_comment": [
-      "SINGLE SOURCE OF TRUTH for agent capabilities.",
-      "This top-level block is the default policy for EVERY agent. A per-agent",
-      "`permission` block overrides it; an agent's `tools` block only decides whether",
-      "a tool is exposed at all. Both layers must agree, so keep them consistent:",
-      "  tools.bash = false -> bash hidden regardless of permission",
-      "  tools.bash = true  -> bash visible, gated by the permission rules below",
-      "Read-only research agents should set tools.bash = false and rely on glob/grep/read.",
-      "The profiles/ws overlay applies tighter per-role allowlists (plan/build/coder/",
-      "explore/researcher); those are deliberately stricter and are the intended policy",
-      "when running under that profile."
-    ],
     "bash": {
       "*": "ask",
       "rm *": "deny",
@@ -32,7 +54,8 @@
       "git reset --hard*": "ask",
       "git clean*": "ask"
     },
-    "webfetch": "allow"
+    "webfetch": "allow",
+    "mcp_*": "ask"
   },
   "instructions": [
     "AGENTS.md",
@@ -391,12 +414,15 @@
       "subtask": true
     }
   },
-  "permission": {
-    "mcp_*": "ask",
-    "workflow": "allow",
-    "workflows": "allow",
-    "tools": "allow"
-  },
+  // NOTE: the second top-level "permission" block that used to live here was DELETED.
+  // JSONC keeps only the LAST duplicate key, so that block was silently replacing the
+  // "permission" block at the top of this file and wiping out permission.bash and
+  // permission.webfetch entirely. Everything it wanted is now merged into the single
+  // "permission" block at the top of the file. Do not re-add a second one.
+  //
+  // "workflow" / "workflows" / "tools" were also dropped: they are not real permission
+  // names (see PermissionConfig in https://opencode.ai/config.json), so they matched no
+  // rule and did nothing.
   "plugin": [
     "C:\\Users\\james\\.config\\opencode\\node_modules\\opencode-antigravity-auth",
     "@bluelovers/opencode-arise",
@@ -429,7 +455,13 @@
     "opencode-litellm",
     "opencode-log-sanitizer",
     "opencode-mem",
-    "opencode-mission-control",
+    // DISABLED on Windows — this is the main source of stray words appearing in the TUI.
+    // Its init runs `tmuxAvailable = await isTmuxAvailable()` and, with NO process.platform
+    // guard, calls console.warn("[Mission Control] tmux is not installed or not in PATH...")
+    // straight into the terminal every time a session starts. Its monitor/reconcile loops add
+    // ~27 more unguarded console.warn/console.error calls that fire mid-session.
+    // tmux is not available on Windows. Re-enable only if you run opencode under WSL/tmux.
+    // "opencode-mission-control",
     "opencode-models-discovery",
     "opencode-mystatus",
     "opencode-notify",
@@ -444,7 +476,16 @@
     "opencode-research-papers",
     "opencode-semantic-anchors",
     "opencode-sessions",
-    "opencode-simple-notify",
+    // DISABLED — THIS was the "words appearing in the interface" glitch.
+    // Its send() is `if (platform === "darwin") { osascript } else { dbus-send }` — the
+    // else branch is "not macOS", NOT "Linux". On Windows it runs
+    //   $`dbus-send --session --dest=org.freedesktop.Notifications ...`
+    // through opencode's injected Bun shell, and Windows has no dbus-send, so the shell
+    // prints "bun: command not found" into the TUI. It fires on session.idle,
+    // session.error, permission.asked AND tool.execute.before(question) — i.e.
+    // repeatedly mid-session — and the `catch {}` swallows the rejection, so all you
+    // see is the stray shell text. Useless on Windows anyway.
+    // "opencode-simple-notify",
     "opencode-smart-title",
     "opencode-smart-voice-notify",
     "opencode-snip",
@@ -459,12 +500,24 @@
     "opencode-wakatime",
     "opencode-workaholic",
     "opencode-worktree-memory-sync",
-    "opencode-zellij-namer",
+    // DISABLED on Windows — shells out to `zellij` with zero process.platform checks
+    // (verified: no "win32" guard anywhere in its dist), so it errors and writes to the
+    // terminal. Re-enable only under WSL/zellij.
+    // "opencode-zellij-namer",
     "open-dynamic-workflows",
     "open-plan-annotator"
   ],
   "provider": {
     "google": {
+      // "npm" tells opencode which AI SDK package backs this provider. The
+      // opencode-antigravity-auth README lists this as the fix for "Gemini Model
+      // Not Found" / "Unknown name 'parameters'" 400s.
+      "npm": "@ai-sdk/google",
+      // IMPORTANT: do NOT set options.baseURL / options.apiKey here. The
+      // opencode-antigravity-auth plugin owns the "google" provider and talks to
+      // https://cloudcode-pa.googleapis.com/v1internal:streamGenerateContent itself.
+      // Pointing google at https://generativelanguage.googleapis.com/v1beta routes the
+      // antigravity-* models to the public Gemini API, which does not know those IDs.
       "models": {
         "antigravity-gemini-3-pro": {
           "name": "Gemini 3 Pro (Antigravity)",

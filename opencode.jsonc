@@ -13,12 +13,20 @@
   ],
   "small_model": "google/antigravity-gemini-3-flash",
   "model": "google/antigravity-claude-opus-4-6-thinking",
-  "providers": {
+  // FIXED: this key was "providers" (plural). The schema key is "provider" (singular),
+  // and because $defs.Config declares additionalProperties:false, ConfigParse.schema
+  // (onExcessProperty:"ignore") dropped the ENTIRE block at load time. That silently
+  // killed the google/ollama/mistral/openrouter/ovhcloud/groq/opencode/nvidia/omniroute
+  // provider definitions below.
+  "provider": {
     "google": {
-      "options": {
-        "apiKey": "{env:GOOGLE_API_KEY}",
-        "baseURL": "https://generativelanguage.googleapis.com/v1beta"
-      },
+      // REMOVED: options.apiKey + options.baseURL.
+      // This block merges on top of opencode.json's provider.google, which is owned by
+      // the opencode-antigravity-auth plugin. That plugin issues its own requests to
+      // https://cloudcode-pa.googleapis.com/v1internal:streamGenerateContent. Forcing
+      // baseURL to https://generativelanguage.googleapis.com/v1beta sent the
+      // antigravity-* models to the public Gemini API, which returns "model not found"
+      // for them — that is why the Google models were failing.
       "models": {
         "gemini-1.5-flash": {
           "name": "Gemini 1.5 Flash"
@@ -95,8 +103,10 @@
     },
     "omniroute": {
       "name": "OmniRoute",
-      "package": "@opencode/ai/providers/openai-compatible",
-      "settings": {
+      // FIXED: "package" is not a ProviderConfig property — the schema key is "npm".
+      "npm": "@opencode/ai/providers/openai-compatible",
+      // FIXED: "settings" is not a ProviderConfig property — the schema key is "options".
+      "options": {
         "baseURL": "http://localhost:20128/v1",
         "apiKey": "{env:OMNIROUTE_API_KEY}"
       },
