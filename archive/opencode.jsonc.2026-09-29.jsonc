@@ -1,0 +1,195 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "enabled_providers": [
+    "ollama",
+    "openrouter",
+    "groq",
+    "google",
+    "mistral",
+    "ovhcloud",
+    "opencode",
+    "nvidia",
+    "omniroute"
+  ],
+  "small_model": "google/antigravity-gemini-3-flash",
+  "model": "google/antigravity-claude-opus-4-6-thinking",
+  "providers": {
+    "google": {
+      "options": {
+        "apiKey": "{env:GOOGLE_API_KEY}",
+        "baseURL": "https://generativelanguage.googleapis.com/v1beta"
+      },
+      "models": {
+        "gemini-1.5-flash": {
+          "name": "Gemini 1.5 Flash"
+        }
+      }
+    },
+    "ollama": {
+      "options": {
+        "apiKey": "{env:OLLAMA_API_KEY}",
+        "baseURL": "http://localhost:11434/v1"
+      },
+      "models": {
+        "qwen3:8b-nothink": {
+          "name": "Qwen 3 8B (local)"
+        }
+      }
+    },
+    "mistral": {
+      "options": {
+        "apiKey": "{env:MISTRAL_API_KEY}",
+        "baseURL": "https://api.mistral.ai/v1"
+      },
+      "models": {
+        "mistral-small-latest": {
+          "name": "Mistral Small"
+        }
+      }
+    },
+    "openrouter": {
+      "options": {
+        "apiKey": "{env:OPENROUTER_API_KEY}"
+      },
+      "models": {
+        "auto": {}
+      }
+    },
+    "ovhcloud": {
+      "options": {
+        "apiKey": "not-required", // OVH AI Endpoints accepts any placeholder; no secret involved.
+        "baseURL": "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1"
+      },
+      "models": {
+        "gpt-oss-120b": {
+          "name": "GPT-OSS 120B"
+        }
+      }
+    },
+    "groq": {
+      "options": {
+        "apiKey": "{env:GROQ_API_KEY}",
+        "baseURL": "https://api.groq.com/openai/v1"
+      },
+      "models": {
+        "llama-3.3-70b-versatile": {
+          "name": "Llama 3.3 70B"
+        }
+      }
+    },
+    "opencode": {
+      "options": {
+        "apiKey": "{env:OPENCODE_ZEN_API_KEY}"
+      },
+      "models": {
+        "nemotron-3.5-lightning-free": {
+          "name": "Nemotron 3.5 Lightning (Free)"
+        }
+      }
+    },
+    "nvidia": {
+      "options": {
+        "apiKey": "{env:NVIDIA_API_KEY}",
+        "baseURL": "https://integrate.api.nvidia.com/v1"
+      }
+    },
+    "omniroute": {
+      "name": "OmniRoute",
+      "package": "@opencode/ai/providers/openai-compatible",
+      "settings": {
+        "baseURL": "http://localhost:20128/v1",
+        "apiKey": "{env:OMNIROUTE_API_KEY}"
+      },
+      "models": {
+        "auto": {
+          "name": "Auto — balanced best free route"
+        },
+        "auto/coding": {
+          "name": "Auto Coding — quality-first"
+        },
+        "auto/fast": {
+          "name": "Auto Fast — speed-first"
+        },
+        "auto/cheap": {
+          "name": "Auto Cheap — free-first"
+        },
+        "auto/smart": {
+          "name": "Auto Smart — quality + explore"
+        },
+        "auto/offline": {
+          "name": "Auto Offline — most capacity"
+        }
+      }
+    }
+  },
+  "mcp": {
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "firecrawl": {
+      "type": "remote",
+      "url": "https://mcp.firecrawl.dev/v2/mcp",
+      "headers": {
+        "Authorization": "Bearer {env:FIRECRAWL_API_KEY}"
+      }
+    },
+    "exa": {
+      "type": "remote",
+      "url": "https://mcp.exa.ai/mcp"
+    },
+    "higgsfield": {
+      "type": "remote",
+      "url": "https://mcp.higgsfield.ai/mcp"
+    },
+    "gh_grep": {
+      "type": "remote",
+      "url": "https://mcp.grep.app"
+    },
+    "canva": {
+      "type": "remote",
+      "url": "https://mcp.canva.com/mcp"
+    },
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "@playwright/mcp@latest"],
+      "enabled": true
+    },
+    "chrome-devtools": {
+      "type": "local",
+      "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
+      "enabled": true
+    },
+    // james-memory disabled: MongoDB-backed memory server never connected (no MONGODB_URI)
+    // and was never used. Re-enable by uncommenting and supplying an Atlas URI first.
+    // "james-memory": {
+    //   "type": "local",
+    //   "command": ["npx", "-y", "@jamesanz/memory-mcp"],
+    //   "enabled": true,
+    //   "environment": {
+    //     "MONGODB_URI": "{env:MONGODB_URI}"
+    //   }
+    // },
+    "supabase": {
+      "type": "remote",
+      "url": "https://mcp.supabase.com/mcp",
+      "enabled": true
+    },
+    "github": {
+      "type": "local",
+      "command": ["C:\\Users\\james\\.local\\bin\\github-mcp-server.exe", "stdio"],
+      "enabled": true,
+      "environment": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "{env:GITHUB_TOKEN}"
+      }
+    },
+    "testsprite": {
+      "type": "local",
+      "command": ["npx", "-y", "@testsprite/testsprite-mcp@latest"],
+      "enabled": true,
+      "environment": {
+        "API_KEY": "{env:TESTSPRITE_API_KEY}"
+      }
+    }
+  }
+}
