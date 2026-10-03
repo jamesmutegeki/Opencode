@@ -132,3 +132,47 @@ of the 29 agent and 27 command definitions.
 
 44 GB reclaimed across both drives. Full breakdown is not config-related and is
 not tracked here.
+---
+
+## 2026-10-03 — Added global AGENTS.md and registered it in `instructions`
+
+### What changed
+
+- Added `AGENTS.md` at the config root (`~/.config/opencode/AGENTS.md`).
+- Added `"instructions": ["AGENTS.md"]` to `opencode.jsonc` so the file loads as
+  a global instruction set on every session.
+
+### Why
+
+The config-change history was only being logged when explicitly asked for. This
+makes it a standing rule instead: any future session that touches
+`opencode.jsonc`, `AGENTS.md`, plugins, skills, agents, commands, MCP servers or
+providers is now instructed to update `CHANGELOG.md`, archive superseded files
+under `archive/`, and push to this repo before finishing.
+
+### What the rule covers
+
+- Never inline a real API key; keys stay in env vars referenced as `{env:VAR}`.
+- Validate config against <https://opencode.ai/config.json> before pushing,
+  because opencode hard-fails to start on a bad shape.
+- Confirm a plugin exists on npm with `npm view <name> version` before adding it.
+- Check the matching env var before enabling an MCP server; otherwise leave it
+  out or set `"enabled": false` and record why.
+- State explicitly what was skipped and why, so the next session does not
+  re-investigate it.
+- Document the `OPENCODE_DISABLE_PROJECT_CONFIG` / `OPENCODE_CONFIG` /
+  `OPENCODE_CONFIG_CONTENT` escape hatches for recovering from a config that
+  will not start.
+- Always tell the user to restart opencode, since config is read once at startup.
+
+### Also recorded in AGENTS.md
+
+The known-defect note on `opencode.json` (named `.json` but containing `//`
+comments, declaring `permission` twice, and referencing `{file:prompts/agents/*.txt}`
+paths absent from this repo), so future sessions do not mistake it for the live
+config or try to load it.
+
+### Verification
+
+`opencode.jsonc` parses as valid JSON and `instructions` resolves to the new
+`AGENTS.md` at the config root. Effective on next opencode restart.
