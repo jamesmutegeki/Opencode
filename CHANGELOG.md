@@ -6,6 +6,87 @@ for it.
 
 ---
 
+## 2026-10-03 — Shell and worktree tools broken: diagnosis only, no config change
+
+### Symptom
+
+Every `bash` / shell tool call fails immediately, before any command runs:
+
+```
+The "paths[0]" property must be of type string, got undefined
+```
+
+That is Bun's `path.resolve` guard, so something is calling `path.resolve` /
+`path.join` with `undefined` as the first element. The `worktree` tool fails
+with the identical error on a plain status call (no arguments). `read`, `glob`,
+`grep`, `webfetch` and `devcontainer` all work normally.
+
+### What was ruled out
+
+- **`opencode.jsonc` is valid.** Checked against
+  <https://opencode.ai/config.json>: `instructions`, `skills.paths`, `plugin`,
+  `provider` and `mcp` are all schema-valid shapes.
+- **No project-level config.** `D:\CV` contains only `certificates/`; there is no
+  `.opencode/` or `opencode.json(c)` there to override anything.
+- **Not a shell/command problem.** The error is byte-identical for PowerShell
+  one-liners, `cmd /c`, and bare `echo hi`, with and without `workdir`.
+- **Not the plugin set.** None of the 10 configured plugins contain a
+  `path.resolve` call on a bash-related path; `opencode-workaholic` has no path
+  resolution at all and `opencode-autotitle` only calls
+  `path.resolve(process.cwd(), logFile)`.
+- **Not reached by the command parser.** `opencode.log` never records a
+  `permission=bash` evaluation for any run today, so the throw happens in core
+  `ShellTool.execute` upstream of permission checking.
+
+### Most likely cause (unverified)
+
+`opencode.log` for this session:
+
+```
+creating instance  directory="D:\CV"
+created ... projectID=global directory="D:\CV" workspaceID=undefined
+```
+
+`D:\CV` is not a git repository, so opencode resolves it as a non-project:
+`projectID=global` and `workspaceID=undefined`. Core's `InstanceStore.boot`
+builds the instance context with `worktree: result.sandbox` from
+`project.fromDirectory()`, and an unresolved sandbox is the most plausible
+source of the `undefined` first path element. Every earlier run logged today
+(15:23-17:57) used `C:\Users\james` or `D:\opencode repairs`, the latter being
+the parent of the `Opencode` mirror repo.
+
+### Changes made to the live config
+
+**None.** `opencode.jsonc`, `AGENTS.md`, plugins, skills and MCP servers were
+all left exactly as they were. There was no config defect to correct.
+
+### Left in a broken or unverified state
+
+1. **Shell and worktree tools are still broken.** No fix was applied, because
+   applying one requires running a command and process spawning is precisely
+   what is failing. The untested fix is `git init "D:\CV"`, then restart
+   opencode so the session directory resolves to a real project. This is
+   unverified — a hand-written `.git` skeleton was considered and rejected as
+   riskier than the real thing.
+2. **Leftover file to delete:**
+   `~/.config/opencode/skills/ck/commands/ocdiag.mjs`. It was written while
+   trying to bootstrap a working shell through the skill-script runner, which
+   does not work either. It has been reduced to a no-op stub. It was
+   deliberately **not** committed here. No file-delete tool was available in
+   that session.
+3. **opencode must be restarted** for anything in this entry to be evaluated.
+
+### Harmless leftovers noticed
+
+`~/.cache/opencode/packages/` contains duplicate `@latest`-suffixed install
+directories for 8 of the plugins (for example
+`opencode-semantic-anchors@latest` alongside `opencode-semantic-anchors`).
+opencode resolves plugins by bare name, so the `@latest` copies are inert and
+were left in place. `opencode-agent-skills` and `opencode-devcontainers` are
+resolved from elsewhere and are not in that cache tree.
+
+---
+
 ## 2026-10-03 — Emergency recovery: config was wiped, rebuilt from backup
 
 ### What happened
@@ -132,6 +213,7 @@ of the 29 agent and 27 command definitions.
 
 44 GB reclaimed across both drives. Full breakdown is not config-related and is
 not tracked here.
+
 ---
 
 ## 2026-10-03 — Added global AGENTS.md and registered it in `instructions`
