@@ -4,6 +4,49 @@ All changes to the opencode configuration. Live config lives at
 `~/.config/opencode/opencode.jsonc` on Windows; this repo is the source of truth
 for it.
 
+
+---
+
+## 2026-10-15 — Fix startup crash: bluesminds 500, hardcoded API key removed
+
+### Symptom
+
+`opencode` crashes immediately on startup with:
+
+```
+UnknownError: An error occurred in Effect.tryPromise
+  [cause]: ClientError: UnexpectedStatus: 500
+    [cause]: Error: {"status":500}
+```
+
+### Root cause
+
+The `bluesminds` provider (`https://api.bluesminds.com/v1`) is unreachable —
+requests either return HTTP 500 or time out entirely. opencode attempts to
+connect to it at startup and crashes.
+
+### What changed
+
+1. **Hardcoded API key removed from config (security fix).** The `bluesminds`
+   provider had `"apiKey": "sk-EAt8..."` inlined directly. Replaced with
+   `"{env:BLUESMINDS_API_KEY}"`. The key was saved to the `BLUESMINDS_API_KEY`
+   User environment variable.
+
+2. **bluesminds added to `disabled_providers`.** Since the server is down,
+   added `"disabled_providers": ["bluesminds"]` at root level to prevent
+   opencode from attempting to connect on startup.
+
+3. **Google provider confirmed working.** `GOOGLE_API_KEY` is set at the User
+   level and the `google` provider block has Gemini models configured — this
+   will be the active provider.
+
+### What was left out
+
+- **Ollama:** Not running locally. Left configured but will only work when
+  `ollama serve` is active.
+- **bluesminds re-enablement:** Remove `"bluesminds"` from `disabled_providers`
+  once their API is back up. The API key is already in the env var.
+
 ---
 
 ## 2026-10-03 — Shell and worktree tools broken: diagnosis only, no config change

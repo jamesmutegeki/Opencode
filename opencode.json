@@ -1,59 +1,44 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "notifications" : false, // Disables opencode's built-in TUI toast ONLY. Desktop notifications,
-                          // terminal title, and cmux status are driven separately by
-                          // profiles/ws/plugins/notify.ts, configured in kdco-notify.json.
-                          // See kdco-notify.json for the authoritative notify settings.
+  "notifications": false,
+  "disabled_providers": ["bluesminds"],
   "default_agent": "build",
+  "shell": "C:\\Program Files\\Git\\bin\\bash.exe",
+  "cwd": ".",
   "permission": {
-    "_comment": [
-      "SINGLE SOURCE OF TRUTH for agent capabilities.",
-      "This top-level block is the default policy for EVERY agent. A per-agent",
-      "`permission` block overrides it; an agent's `tools` block only decides whether",
-      "a tool is exposed at all. Both layers must agree, so keep them consistent:",
-      "  tools.bash = false -> bash hidden regardless of permission",
-      "  tools.bash = true  -> bash visible, gated by the permission rules below",
-      "Read-only research agents should set tools.bash = false and rely on glob/grep/read.",
-      "The profiles/ws overlay applies tighter per-role allowlists (plan/build/coder/",
-      "explore/researcher); those are deliberately stricter and are the intended policy",
-      "when running under that profile."
-    ],
     "bash": {
       "*": "ask",
-      "rm *": "deny",
-      "rmdir *": "deny",
-      "del *": "deny",
-      "Remove-Item *": "deny",
-      "format *": "deny",
-      "mkfs*": "deny",
-      "dd *": "deny",
-      "reg delete*": "deny",
+      "rm *": "ask",
+      "rmdir *": "ask",
+      "del *": "ask",
+      "Remove-Item *": "ask",
+      "format *": "ask",
+      "mkfs*": "ask",
+      "dd *": "ask",
+      "reg delete*": "ask",
       "git push*": "ask",
       "git reset --hard*": "ask",
       "git clean*": "ask"
     },
-    "webfetch": "allow"
+    "webfetch": "allow",
+    "mcp_*": "ask",
+    "workflow": "allow",
+    "workflows": "allow"
   },
   "instructions": [
     "AGENTS.md",
-    "CONTRIBUTING.md",
     "instructions/INSTRUCTIONS.md",
     "instructions/apify-routing.md",
     "skills/tdd-workflow/SKILL.md",
-    "skills/security-review/SKILL.md",
-    "skills/coding-standards/SKILL.md",
-    "skills/frontend-patterns/SKILL.md",
-    "skills/frontend-slides/SKILL.md",
-    "skills/backend-patterns/SKILL.md",
+    "skills/security-reviewer/SKILL.md",
     "skills/e2e-testing/SKILL.md",
     "skills/verification-loop/SKILL.md",
-    "skills/api-design/SKILL.md",
     "skills/strategic-compact/SKILL.md",
     "skills/eval-harness/SKILL.md"
   ],
   "skills": {
     "paths": [
-      "../skills"
+      "C:\\Users\\james\\.config\\opencode\\skills"
     ]
   },
   "agent": {
@@ -185,7 +170,7 @@
       }
     },
     "go-build-resolver": {
-      "description": "Go build, vet, and compilation error resolution specialist. Fixes build errors with minimal changes.",
+      "description": "Go build, vet, and compilation error resolution specialist. Fixes Go build errors with minimal changes.",
       "mode": "subagent",
       "prompt": "{file:prompts/agents/go-build-resolver.txt}",
       "tools": {
@@ -217,6 +202,103 @@
         "edit": false
       }
     },
+    "cpp-build-resolver": {
+      "description": "C++ build, CMake, and compilation error resolution specialist. Fixes build errors, linker issues, and template errors with minimal changes.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/cpp-build-resolver.txt}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "docs-lookup": {
+      "description": "Documentation specialist using Context7 MCP to fetch current library and API documentation with code examples.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/docs-lookup.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": false,
+        "edit": false
+      }
+    },
+    "harness-optimizer": {
+      "description": "Analyze and improve the local agent harness configuration for reliability, cost, and throughput.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/harness-optimizer.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "edit": true
+      }
+    },
+    "java-reviewer": {
+      "description": "Expert Java and Spring Boot code reviewer specializing in layered architecture, JPA patterns, security, and concurrency.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/java-reviewer.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": false,
+        "edit": false
+      }
+    },
+    "java-build-resolver": {
+      "description": "Java/Maven/Gradle build, compilation, and dependency error resolution specialist. Fixes build errors with minimal changes.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/java-build-resolver.txt}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "kotlin-reviewer": {
+      "description": "Kotlin and Android/KMP code reviewer. Reviews Kotlin code for idiomatic patterns, coroutine safety, Compose best practices.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/kotlin-reviewer.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": false,
+        "edit": false
+      }
+    },
+    "kotlin-build-resolver": {
+      "description": "Kotlin/Gradle build, compilation, and dependency error resolution specialist. Fixes Kotlin build errors with minimal changes.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/kotlin-build-resolver.txt}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "loop-operator": {
+      "description": "Operate autonomous agent loops, monitor progress, and intervene safely when loops stall.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/loop-operator.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "edit": true
+      }
+    },
+    "php-reviewer": {
+      "description": "Expert PHP code reviewer specializing in PSR-12 compliance, PHP type system, Eloquent ORM patterns, security, and performance.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/php-reviewer.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": false,
+        "edit": false
+      }
+    },
     "python-reviewer": {
       "description": "Expert Python code reviewer specializing in PEP 8 compliance, Pythonic idioms, type hints, security, and performance.",
       "mode": "subagent",
@@ -240,7 +322,7 @@
       }
     },
     "rust-build-resolver": {
-      "description": "Rust build, Cargo, and compilation error resolution specialist. Fixes build errors with minimal changes.",
+      "description": "Rust build, Cargo, and compilation error resolution specialist. Fixes Rust build errors with minimal changes.",
       "mode": "subagent",
       "prompt": "{file:prompts/agents/rust-build-resolver.txt}",
       "tools": {
@@ -249,6 +331,12 @@
         "edit": true,
         "bash": true
       }
+    },
+    "explore": {
+      "disable": true
+    },
+    "general": {
+      "disable": true
     }
   },
   "command": {
@@ -391,155 +479,161 @@
       "subtask": true
     }
   },
-  "permission": {
-    "mcp_*": "ask",
-    "workflow": "allow",
-    "workflows": "allow",
-    "tools": "allow"
+  "plugin": [],
+  "mcp": {
+    "semantic-scholar": {
+      "type": "local",
+      "command": [
+        "node",
+        "C:\\Users\\james\\.config\\opencode\\node_modules\\@xbghc\\semanticscholar-mcp\\dist\\index.js"
+      ],
+      "environment": {
+        "SEMANTIC_SCHOLAR_API_KEY": "{env:SEMANTIC_SCHOLAR_API_KEY}"
+      },
+      "enabled": true
+    },
+    "duckdb": {
+      "type": "local",
+      "command": [
+        "node",
+        "C:\\Users\\james\\.config\\opencode\\node_modules\\duckdb-mcp\\dist\\index.js"
+      ],
+      "enabled": true
+    }
   },
-  "plugin": [
-    "C:\\Users\\james\\.config\\opencode\\node_modules\\opencode-antigravity-auth",
-    "@bluelovers/opencode-arise",
-    "envsitter-guard",
-    "harness-memory",
-    "micode",
-    "oh-my-opencode-slim",
-    "opencode-adaptive-thinking",
-    "opencode-agent-memory",
-    "opencode-agent-skills",
-    "opencode-agents-sidebar",
-    "opencode-agent-tmux",
-    "opencode-ascii",
-    "opencode-autotitle",
-    "opencode-background-agents",
-    "opencode-beads",
-    "opencode-bmad-workflow",
-    "opencode-ccs-sync",
-    "opencode-devcontainers",
-    "opencode-direnv",
-    "opencode-froggy",
-    "opencode-gemini-auth",
-    "opencode-github-release",
-    "opencode-gpt-imagegen",
-    "opencode-handoff",
-    "opencode-hooks-plugin",
-    "opencode-host-notify-bridge",
-    "opencode-ignore",
-    "opencode-kilo-auth",
-    "opencode-litellm",
-    "opencode-log-sanitizer",
-    "opencode-mem",
-    "opencode-mission-control",
-    "opencode-models-discovery",
-    "opencode-mystatus",
-    "opencode-notify",
-    "opencode-ntfy.sh",
-    "opencode-omniroute-auth",
-    "opencode-openai-codex-auth",
-    "opencode-personality",
-    "opencode-plan-manager",
-    "opencode-plugin-openspec",
-    "opencode-pr-signature",
-    "opencode-ralph-wiggum",
-    "opencode-research-papers",
-    "opencode-semantic-anchors",
-    "opencode-sessions",
-    "opencode-simple-notify",
-    "opencode-smart-title",
-    "opencode-smart-voice-notify",
-    "opencode-snip",
-    "opencode-snippets",
-    "opencode-synced",
-    "opencode-system-prompt-logger",
-    "opencode-telemetry",
-    "opencode-token-tracker",
-    "opencode-tts",
-    "opencode-update-notifier",
-    "opencode-usage-monitor",
-    "opencode-wakatime",
-    "opencode-workaholic",
-    "opencode-worktree-memory-sync",
-    "opencode-zellij-namer",
-    "open-dynamic-workflows",
-    "open-plan-annotator"
-  ],
   "provider": {
     "google": {
       "models": {
-        "antigravity-gemini-3-pro": {
-          "name": "Gemini 3 Pro (Antigravity)",
-          "limit": { "context": 1048576, "output": 65535 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] },
-          "variants": {
-            "low": { "thinkingLevel": "low" },
-            "high": { "thinkingLevel": "high" }
-          }
-        },
-        "antigravity-gemini-3.1-pro": {
-          "name": "Gemini 3.1 Pro (Antigravity)",
-          "limit": { "context": 1048576, "output": 65535 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] },
-          "variants": {
-            "low": { "thinkingLevel": "low" },
-            "high": { "thinkingLevel": "high" }
-          }
-        },
-        "antigravity-gemini-3-flash": {
-          "name": "Gemini 3 Flash (Antigravity)",
-          "limit": { "context": 1048576, "output": 65536 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] },
-          "variants": {
-            "minimal": { "thinkingLevel": "minimal" },
-            "low": { "thinkingLevel": "low" },
-            "medium": { "thinkingLevel": "medium" },
-            "high": { "thinkingLevel": "high" }
-          }
-        },
-        "antigravity-claude-sonnet-4-6": {
-          "name": "Claude Sonnet 4.6 (Antigravity)",
-          "limit": { "context": 200000, "output": 64000 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
-        },
-        "antigravity-claude-opus-4-6-thinking": {
-          "name": "Claude Opus 4.6 Thinking (Antigravity)",
-          "limit": { "context": 200000, "output": 64000 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] },
-          "variants": {
-            "low": { "thinkingConfig": { "thinkingBudget": 8192 } },
-            "max": { "thinkingConfig": { "thinkingBudget": 32768 } }
-          }
-        },
         "gemini-2.5-flash": {
           "name": "Gemini 2.5 Flash (Gemini CLI)",
-          "limit": { "context": 1048576, "output": 65536 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
         },
         "gemini-2.5-pro": {
           "name": "Gemini 2.5 Pro (Gemini CLI)",
-          "limit": { "context": 1048576, "output": 65536 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
         },
         "gemini-3-flash-preview": {
           "name": "Gemini 3 Flash Preview (Gemini CLI)",
-          "limit": { "context": 1048576, "output": 65536 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
         },
         "gemini-3-pro-preview": {
           "name": "Gemini 3 Pro Preview (Gemini CLI)",
-          "limit": { "context": 1048576, "output": 65535 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
+          "limit": {
+            "context": 1048576,
+            "output": 65535
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
         },
         "gemini-3.1-pro-preview": {
           "name": "Gemini 3.1 Pro Preview (Gemini CLI)",
-          "limit": { "context": 1048576, "output": 65535 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
+          "limit": {
+            "context": 1048576,
+            "output": 65535
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
         },
         "gemini-3.1-pro-preview-customtools": {
           "name": "Gemini 3.1 Pro Preview Custom Tools (Gemini CLI)",
-          "limit": { "context": 1048576, "output": 65535 },
-          "modalities": { "input": ["text", "image", "pdf"], "output": ["text"] }
+          "limit": {
+            "context": 1048576,
+            "output": 65535
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        }
+      }
+    },
+    "bluesminds": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "BlueSminds",
+      "options": {
+        "baseURL": "https://api.bluesminds.com/v1",
+        "apiKey": "{env:BLUESMINDS_API_KEY}"
+      },
+      "models": {
+        "meta/llama-3.2-11b-vision-instruct": {
+          "name": "Llama 3.2 11B Vision Instruct",
+          "modalities": {
+            "input": [
+              "text",
+              "image"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "openai/gpt-oss-20b": {
+          "name": "GPT-OSS 20B"
         }
       }
     }
-  }
+  },
+  "lsp": true,
+  "plugins": []
 }
