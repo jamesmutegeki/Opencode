@@ -7,11 +7,11 @@ for it.
 
 ---
 
-## 2026-10-15 — Fix startup crash: bluesminds 500, hardcoded API key removed
+## 2026-10-15 — Fix startup crash: stale 68-plugin opencode.json in home dir
 
 ### Symptom
 
-`opencode` crashes immediately on startup with:
+`opencode` and `opencode session list` crash with:
 
 ```
 UnknownError: An error occurred in Effect.tryPromise
@@ -21,24 +21,32 @@ UnknownError: An error occurred in Effect.tryPromise
 
 ### Root cause
 
-The `bluesminds` provider (`https://api.bluesminds.com/v1`) is unreachable —
-requests either return HTTP 500 or time out entirely. opencode attempts to
-connect to it at startup and crashes.
+A stale `opencode.json` (not `.jsonc`) was sitting in `C:\Users\james\` — the
+working directory where `opencode` is launched. opencode picks this up as
+project-level config. This file contained **68 plugins** (many not installed or
+broken on load), including `opencode-antigravity-auth` referenced by local
+path. One or more of those plugins crash on initialization, causing the
+background service to return HTTP 500 to the CLI.
+
+The live, curated config is `opencode.jsonc` (10 plugins). The `.json` file was
+an old archive that should never have been loadable — as noted in `AGENTS.md`.
 
 ### What changed
 
-1. **Hardcoded API key removed from config (security fix).** The `bluesminds`
-   provider had `"apiKey": "sk-EAt8..."` inlined directly. Replaced with
-   `"{env:BLUESMINDS_API_KEY}"`. The key was saved to the `BLUESMINDS_API_KEY`
-   User environment variable.
+1. **Removed `opencode.json` from home dir.** Moved to
+   `archive/opencode.json.68-plugins-broken`. Only `opencode.jsonc` remains as
+   the project-level config.
 
-2. **bluesminds added to `disabled_providers`.** Since the server is down,
-   added `"disabled_providers": ["bluesminds"]` at root level to prevent
-   opencode from attempting to connect on startup.
+2. **Hardcoded bluesminds API key removed from global config (security fix).**
+   `~/.config/opencode/opencode.json` had `"apiKey": "sk-EAt8..."` inlined.
+   Replaced with `"{env:BLUESMINDS_API_KEY}"`. The key was saved to the
+   `BLUESMINDS_API_KEY` User environment variable.
 
-3. **Google provider confirmed working.** `GOOGLE_API_KEY` is set at the User
-   level and the `google` provider block has Gemini models configured — this
-   will be the active provider.
+3. **bluesminds added to `disabled_providers` in global config.** Their API is
+   unreachable (500/timeout). Added `"disabled_providers": ["bluesminds"]`.
+
+4. **Google provider confirmed working.** `GOOGLE_API_KEY` is set at the User
+   level and the `google` provider block has Gemini models configured.
 
 ### What was left out
 
@@ -46,6 +54,9 @@ connect to it at startup and crashes.
   `ollama serve` is active.
 - **bluesminds re-enablement:** Remove `"bluesminds"` from `disabled_providers`
   once their API is back up. The API key is already in the env var.
+- **68-plugin config not triaged.** The broken config was archived as-is. If
+  any of those plugins are wanted, they should be added individually to
+  `opencode.jsonc` after verifying they install and load cleanly.
 
 ---
 
