@@ -1,0 +1,44 @@
+{
+  // Sanitized template of opencode.json — NO SECRETS.
+  // Copy the provider blocks you need into your real opencode.json.
+  // opencode.json and .env are gitignored; this file is the version-safe reference.
+  "$schema": "https://opencode.ai/config.json",
+
+  "provider": {
+    // BlueSminds — not a models.dev provider, so it must be declared explicitly.
+    // Endpoint is OpenAI-compatible (new-api gateway style).
+    // Keys are issued at https://api.bluesminds.com/keys
+    "bluesminds": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "BlueSminds",
+      "options": {
+        "baseURL": "https://api.bluesminds.com/v1",
+        // Prefer an env var over a literal key so the secret never lands in a file.
+        // Set it in ~/.config/opencode/.env (gitignored) or your shell profile:
+        //   export BLUESMINDS_API_KEY=sk-...
+        "apiKey": "{env:BLUESMINDS_API_KEY}"
+      },
+      "models": {
+        // Verified working 2026-10-15 via `opencode run`.
+        "openai/gpt-oss-20b": {
+          "name": "GPT-OSS 20B"
+        },
+        // Connects, but NOT agent-safe: it hijacks plain prompts into `edit` tool
+        // calls. Use for one-off vision reads only, never as a build/review model.
+        "meta/llama-3.2-11b-vision-instruct": {
+          "name": "Llama 3.2 11B Vision Instruct",
+          "modalities": {
+            "input": ["text", "image"],
+            "output": ["text"]
+          }
+        }
+        // NOTE: `moonshotai/kimi-k3` is advertised by /v1/models but every call
+        // fails with "reached its end of life on 2026-10-15". Left out on purpose.
+      }
+    }
+
+    // NVIDIA is a built-in provider — do NOT declare it in config.
+    // Authenticate with `/connect` (search "NVIDIA") or export NVIDIA_API_KEY.
+    // Credential lives in ~/.local/share/opencode/auth.json, not here.
+  }
+}
