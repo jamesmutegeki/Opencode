@@ -7,26 +7,6 @@
     "paths": ["./skills"]
   },
 
-  "provider": {
-    "ollama": {
-      "options": {
-        "baseURL": "http://localhost:11434/v1"
-      }
-    }
-  },
-
-  "plugin": [
-    "opencode-agent-skills",
-    "opencode-agent-memory",
-    "opencode-semantic-anchors",
-    "opencode-adaptive-thinking",
-    "opencode-autotitle",
-    "opencode-sessions",
-    "opencode-plan-manager",
-    "opencode-background-agents",
-    "opencode-devcontainers",
-    "opencode-workaholic"
-  ],
 
   "mcp": {
     "context7": {
@@ -51,12 +31,12 @@
     "playwright": {
       "type": "local",
       "command": ["npx", "@playwright/mcp@latest"],
-      "enabled": true
+      "enabled": false
     },
     "chrome-devtools": {
       "type": "local",
       "command": ["npx", "-y", "chrome-devtools-mcp@latest"],
-      "enabled": true
+      "enabled": false
     },
     "supabase": {
       "type": "remote",

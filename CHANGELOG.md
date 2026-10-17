@@ -7,6 +7,55 @@ for it.
 
 ---
 
+## 2026-10-17 — Finish crash-fix cleanup: trim project config, archive repo-root opencode.json
+
+Follow-up to the 2026-10-15 startup-crash fix. The stale home-dir
+`opencode.json` was already removed on disk and the bluesminds fixes were
+already pushed, but three pieces were left uncommitted and undocumented.
+
+### What changed and why
+
+1. **Project `opencode.jsonc` trimmed to a minimal stable baseline.** Removed
+   the 10-plugin array (`opencode-agent-skills`, `opencode-agent-memory`,
+   `opencode-semantic-anchors`, `opencode-adaptive-thinking`,
+   `opencode-autotitle`, `opencode-sessions`, `opencode-plan-manager`,
+   `opencode-background-agents`, `opencode-devcontainers`,
+   `opencode-workaholic`), removed the `ollama` provider block, and set the
+   `playwright` and `chrome-devtools` MCP servers to `enabled: false`.
+   Reason: repeated session/server restarts and unstable MCP/skill catalog
+   loading while the full plugin set was active. Removals only — no new keys,
+   no schema changes.
+
+2. **Repo-root `opencode.json` moved to
+   `archive/opencode.json.archived-2026-10-17`.** The home directory is a
+   checkout of this repo, so a file named `opencode.json` at the repo root
+   materializes in `C:\Users\james\`, where opencode picks it up as
+   project-level config — the exact mechanism behind the 2026-10-15 crash.
+   Keeping it at the root guaranteed the crash would recur on the next fresh
+   checkout. Preserved under `archive/` per repo policy.
+
+3. **Home-dir checkout fast-forwarded to origin/main.** Its uncommitted local
+   copies of these same changes were stashed and dropped as redundant once
+   the merge brought in identical content.
+
+### What was left out
+
+- **Plugins not triaged.** Re-add each of the 10 plugins individually, and
+  only after `npm view <name> version` confirms the package resolves and it
+  loads cleanly. Do not restore the whole list at once.
+- **playwright / chrome-devtools MCP:** disabled, not removed. Flip
+  `enabled` back to `true` in `opencode.jsonc` to restore them.
+- **ollama:** removed from the project config only. The global config keeps
+  its provider entry; it only works while `ollama serve` is running.
+- **bluesminds:** still in `disabled_providers` (API unreachable; key lives
+  in the `BLUESMINDS_API_KEY` env var). Remove the entry to re-enable.
+- **Skills submodule** (`.config/opencode/skills/ui-ux-pro-max-skill`) is
+  dirty inside the home checkout (ECC skill updates inside the submodule;
+  the pinned gitlink is unchanged). Committing inside that submodule is a
+  separate decision, deliberately not made here.
+
+---
+
 ## 2026-10-15 — Fix startup crash: stale 68-plugin opencode.json in home dir
 
 ### Symptom

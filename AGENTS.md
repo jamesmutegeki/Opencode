@@ -59,8 +59,12 @@ user to restart opencode after a config change.**
 
 ## Known repo issues
 
-`opencode.json` in that repo is an archive of agent/command/plugin definitions
-and is **not** loadable as-is: it is named `.json` but contains `//` inline
-comments, declares the `permission` key twice, and its agents reference
-`{file:prompts/agents/*.txt}` paths that do not exist in the repo. The live
-config is `opencode.jsonc`.
+`archive/opencode.json.archived-2026-10-17` (formerly the repo-root
+`opencode.json`) is an archive of agent/command/plugin definitions and is
+**not** loadable as-is: it is named `.json` but contains `//` inline comments,
+declares the `permission` key twice, and its agents reference
+`{file:prompts/agents/*.txt}` paths that do not exist in the repo. It was moved
+into `archive/` on 2026-10-17 because the home directory is a checkout of this
+repo, and a root-level `opencode.json` materializes there, where opencode loads
+it as project config — the cause of the 2026-10-15 startup crash. Never place a
+file named `opencode.json` at the repo root. The live config is `opencode.jsonc`.
