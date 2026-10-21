@@ -1,9 +1,8 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "notifications": false,
   "default_agent": "build",
-  "shell": "C:\\Program Files\\Git\\bin\\bash.exe",
-  "cwd": ".",
+  "shell": "bash",
+
   "permissions": [
     {
       "action": "shell",
@@ -33,6 +32,11 @@
     {
       "action": "shell",
       "resource": "git branch*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git pull*",
       "effect": "allow"
     },
     {
@@ -156,16 +160,19 @@
       "effect": "allow"
     }
   ],
+  
   "instructions": [
     "AGENTS.md",
     "instructions/INSTRUCTIONS.md",
     "instructions/apify-routing.md"
   ],
+  
   "skills": {
     "paths": [
-      "C:\\Users\\james\\.config\\opencode\\skills"
+      "./skills"
     ]
   },
+  
   "agent": {
     "build": {
       "description": "Primary coding agent for development work",
@@ -464,162 +471,39 @@
       "disable": true
     }
   },
+
   "mcp": {
     "servers": {
       "semantic-scholar": {
         "type": "local",
-        "command": [
-          "node",
-          "C:\\Users\\james\\.config\\opencode\\node_modules\\@xbghc\\semanticscholar-mcp\\dist\\index.js"
-        ],
+        "command": ["npx", "-y", "@xbghc/semanticscholar-mcp"],
         "environment": {
           "SEMANTIC_SCHOLAR_API_KEY": "{env:SEMANTIC_SCHOLAR_API_KEY}"
         },
-        "disabled": true
+        "enabled": false
       },
       "duckdb": {
         "type": "local",
-        "command": [
-          "node",
-          "C:\\Users\\james\\.config\\opencode\\node_modules\\duckdb-mcp\\dist\\index.js"
-        ],
-        "disabled": true
+        "command": ["npx", "-y", "duckdb-mcp"],
+        "enabled": false
       }
     }
   },
-  "provider": {
-    "google": {
-      "models": {
-        "gemini-2.5-flash": {
-          "name": "Gemini 2.5 Flash (Gemini CLI)",
-          "limit": {
-            "context": 1048576,
-            "output": 65536
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "gemini-2.5-pro": {
-          "name": "Gemini 2.5 Pro (Gemini CLI)",
-          "limit": {
-            "context": 1048576,
-            "output": 65536
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "gemini-3-flash-preview": {
-          "name": "Gemini 3 Flash Preview (Gemini CLI)",
-          "limit": {
-            "context": 1048576,
-            "output": 65536
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "gemini-3-pro-preview": {
-          "name": "Gemini 3 Pro Preview (Gemini CLI)",
-          "limit": {
-            "context": 1048576,
-            "output": 65535
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "gemini-3.1-pro-preview": {
-          "name": "Gemini 3.1 Pro Preview (Gemini CLI)",
-          "limit": {
-            "context": 1048576,
-            "output": 65535
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "gemini-3.1-pro-preview-customtools": {
-          "name": "Gemini 3.1 Pro Preview Custom Tools (Gemini CLI)",
-          "limit": {
-            "context": 1048576,
-            "output": 65535
-          },
-          "modalities": {
-            "input": [
-              "text",
-              "image",
-              "pdf"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        }
-      }
-    },
-    "bluesminds": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "BlueSminds",
-      "options": {
-        "baseURL": "https://api.bluesminds.com/v1",
-        "apiKey": "{env:BLUESMINDS_API_KEY}"
-      },
-      "models": {
-        "meta/llama-3.2-11b-vision-instruct": {
-          "name": "Llama 3.2 11B Vision Instruct",
-          "modalities": {
-            "input": [
-              "text",
-              "image"
-            ],
-            "output": [
-              "text"
-            ]
-          }
-        },
-        "openai/gpt-oss-20b": {
-          "name": "GPT-OSS 20B"
-        }
-      }
-    }
-  },
+
   "lsp": true,
-  "plugins": []
+  "plugins": [
+    "@imythms/opencode-md-table-formatter",
+    "@opencode-ai/plugin",
+    "@opencode/cli",
+    "@xbghc/semanticscholar-mcp",
+    "duckdb-mcp",
+    "opencode-agent-skills",
+    "opencode-antigravity-auth",
+    "opencode-autotitle",
+    "opencode-browser",
+    "opencode-personality",
+    "opencode-research-papers",
+    "opencode-websearch-cited",
+    "opencode-workaholic"
+  ]
 }
