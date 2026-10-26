@@ -505,5 +505,16 @@
     "opencode-research-papers",
     "opencode-websearch-cited",
     "opencode-workaholic"
-  ]
+  ],
+  "provider": {
+    "opencode": {
+        "npm": "@ai-sdk/openai-compatible",
+        "name": "Free Claude Code",
+        "options": {
+            "baseURL": "http://127.0.0.1:8082/v1",
+            "apiKey": "{env:FCC_API_KEY}"
+        },
+        "models": {}
+    }
+  }
 }
