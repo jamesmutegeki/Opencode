@@ -1,7 +1,8 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "default_agent": "build",
-  "shell": "bash",
+  "model": "fcc/sonnet-4",
+  "shell": "powershell",
 
   "permissions": [
     {
@@ -160,19 +161,19 @@
       "effect": "allow"
     }
   ],
-  
+
   "instructions": [
     "AGENTS.md",
     "instructions/INSTRUCTIONS.md",
     "instructions/apify-routing.md"
   ],
-  
+
   "skills": {
     "paths": [
       "./skills"
     ]
   },
-  
+
   "agent": {
     "build": {
       "description": "Primary coding agent for development work",
@@ -480,41 +481,33 @@
         "environment": {
           "SEMANTIC_SCHOLAR_API_KEY": "{env:SEMANTIC_SCHOLAR_API_KEY}"
         },
-        "enabled": false
+        "enabled": true
       },
       "duckdb": {
         "type": "local",
         "command": ["npx", "-y", "duckdb-mcp"],
-        "enabled": false
+        "enabled": true
       }
     }
   },
 
   "lsp": true,
-  "plugins": [
-    "@imythms/opencode-md-table-formatter",
-    "@opencode-ai/plugin",
-    "@opencode/cli",
-    "@xbghc/semanticscholar-mcp",
-    "duckdb-mcp",
-    "opencode-agent-skills",
-    "opencode-antigravity-auth",
-    "opencode-autotitle",
-    "opencode-browser",
-    "opencode-personality",
-    "opencode-research-papers",
-    "opencode-websearch-cited",
-    "opencode-workaholic"
-  ],
-  "provider": {
-    "opencode": {
-        "npm": "@ai-sdk/openai-compatible",
-        "name": "Free Claude Code",
-        "options": {
-            "baseURL": "http://127.0.0.1:8082/v1",
-            "apiKey": "{env:FCC_API_KEY}"
-        },
-        "models": {}
+  "plugins": [],
+  "providers": {
+    "fcc": {
+      "name": "Free Claude Code",
+      "package": "@ai-sdk/anthropic",
+      "settings": {
+        "baseURL": "http://127.0.0.1:8082/v1",
+        "apiKey": "{env:FCC_API_KEY}"
+      },
+      "models": {
+        "sonnet-4": { "modelID": "claude-sonnet-4-20250514", "name": "Sonnet 4 (FCC)" },
+        "opus-4": { "modelID": "claude-opus-4-20250514", "name": "Opus 4 (FCC)" },
+        "haiku-4": { "modelID": "claude-haiku-4-20250514", "name": "Haiku 4 (FCC)" },
+        "fable-5": { "modelID": "claude-fable-5", "name": "Fable 5 (FCC)" }
+      }
     }
   }
 }
+

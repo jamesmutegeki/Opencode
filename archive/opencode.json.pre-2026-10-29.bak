@@ -1,0 +1,512 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "build-orchestrator",
+  "shell": "powershell",
+
+  "permissions": [
+    {
+      "action": "shell",
+      "resource": "*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git status*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git diff*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git log*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git show*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git branch*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git pull*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "ls *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "cat *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "head *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "tail *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "wc *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "grep *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "rg *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "find *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "which *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "echo *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "rm *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "rmdir *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "del *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "Remove-Item *",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git push*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git reset --hard*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "git clean*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "reg delete*",
+      "effect": "ask"
+    },
+    {
+      "action": "shell",
+      "resource": "format *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "mkfs*",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "dd *",
+      "effect": "deny"
+    },
+    {
+      "action": "webfetch",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "workflow",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "workflows",
+      "resource": "*",
+      "effect": "allow"
+    }
+  ],
+
+  "instructions": [
+    "AGENTS.md",
+    "instructions/INSTRUCTIONS.md",
+    "instructions/apify-routing.md"
+  ],
+
+  "skills": {
+    "paths": [
+      "./skills"
+    ]
+  },
+
+  "agent": {
+    "build": {
+      "description": "Primary coding agent for development work",
+      "mode": "primary",
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": true,
+        "read": true,
+        "changed-files": true,
+        "workflow": true
+      }
+    },
+    "apify": {
+      "description": "Apify specialist for web scraping, browser automation, and data extraction. Routes every Apify request to the right skill, MCP tool, or CLI workflow.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/apify.txt}"
+    },
+    "planner": {
+      "description": "Expert planning specialist for complex features and refactoring. Use for implementation planning, architectural changes, or complex refactoring.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/planner.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": true,
+        "edit": true
+      }
+    },
+    "architect": {
+      "description": "Software architecture specialist for system design, scalability, and technical decision-making.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/architect.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": false,
+        "edit": false
+      }
+    },
+    "code-reviewer": {
+      "description": "Expert code review specialist. Reviews code for quality, security, and maintainability. Use immediately after writing or modifying code.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/code-reviewer.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": false,
+        "edit": false
+      }
+    },
+    "security-reviewer": {
+      "description": "Security vulnerability detection and remediation specialist. Use after writing code that handles user input, authentication, API endpoints, or sensitive data.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/security-reviewer.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": true,
+        "edit": true
+      }
+    },
+    "tdd-guide": {
+      "description": "Test-Driven Development specialist enforcing write-tests-first methodology. Use when writing new features, fixing bugs, or refactoring code. Ensures 80%+ test coverage.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/tdd-guide.txt}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "build-error-resolver": {
+      "description": "Build and TypeScript error resolution specialist. Use when build fails or type errors occur. Fixes build/type errors only with minimal diffs.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/build-error-resolver.txt}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "e2e-runner": {
+      "description": "End-to-end testing specialist using Playwright. Generates, maintains, and runs E2E tests for critical user flows.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/e2e-runner.txt}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "doc-updater": {
+      "description": "Documentation and codemap specialist. Use for updating codemaps and documentation.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/doc-updater.txt}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "refactor-cleaner": {
+      "description": "Dead code cleanup and consolidation specialist. Use for removing unused code, duplicates, and refactoring.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/refactor-cleaner.txt}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "go-reviewer": {
+      "description": "Expert Go code reviewer specializing in idiomatic Go, concurrency patterns, error handling, and performance.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/go-reviewer.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": false,
+        "edit": false
+      }
+    },
+    "go-build-resolver": {
+      "description": "Go build, vet, and compilation error resolution specialist. Fixes Go build errors with minimal changes.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/go-build-resolver.txt}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "database-reviewer": {
+      "description": "PostgreSQL database specialist for query optimization, schema design, security, and performance. Incorporates Supabase best practices.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/database-reviewer.txt}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "cpp-reviewer": {
+      "description": "Expert C++ code reviewer specializing in memory safety, modern C++ idioms, concurrency, and performance. Use for all C++ code changes.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/cpp-reviewer.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": false,
+        "edit": false
+      }
+    },
+    "cpp-build-resolver": {
+      "description": "C++ build, CMake, and compilation error resolution specialist. Fixes build errors, linker issues, and template errors with minimal changes.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/cpp-build-resolver.txt}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "docs-lookup": {
+      "description": "Documentation specialist using Context7 MCP to fetch current library and API documentation with code examples.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/docs-lookup.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": false,
+        "edit": false
+      }
+    },
+    "harness-optimizer": {
+      "description": "Analyze and improve the local agent harness configuration for reliability, cost, and throughput.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/harness-optimizer.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "edit": true
+      }
+    },
+    "java-reviewer": {
+      "description": "Expert Java and Spring Boot code reviewer specializing in layered architecture, JPA patterns, security, and concurrency.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/java-reviewer.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": false,
+        "edit": false
+      }
+    },
+    "java-build-resolver": {
+      "description": "Java/Maven/Gradle build, compilation, and dependency error resolution specialist. Fixes build errors with minimal changes.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/java-build-resolver.txt}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "kotlin-reviewer": {
+      "description": "Kotlin and Android/KMP code reviewer. Reviews Kotlin code for idiomatic patterns, coroutine safety, Compose best practices.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/kotlin-reviewer.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": false,
+        "edit": false
+      }
+    },
+    "kotlin-build-resolver": {
+      "description": "Kotlin/Gradle build, compilation, and dependency error resolution specialist. Fixes Kotlin build errors with minimal changes.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/kotlin-build-resolver.txt}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "loop-operator": {
+      "description": "Operate autonomous agent loops, monitor progress, and intervene safely when loops stall.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/loop-operator.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "edit": true
+      }
+    },
+    "php-reviewer": {
+      "description": "Expert PHP code reviewer specializing in PSR-12 compliance, PHP type system, Eloquent ORM patterns, security, and performance.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/php-reviewer.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": false,
+        "edit": false
+      }
+    },
+    "python-reviewer": {
+      "description": "Expert Python code reviewer specializing in PEP 8 compliance, Pythonic idioms, type hints, security, and performance.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/python-reviewer.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": false,
+        "edit": false
+      }
+    },
+    "rust-reviewer": {
+      "description": "Expert Rust code reviewer specializing in idiomatic Rust, ownership, lifetimes, concurrency, and performance.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/rust-reviewer.txt}",
+      "tools": {
+        "read": true,
+        "bash": true,
+        "write": false,
+        "edit": false
+      }
+    },
+    "rust-build-resolver": {
+      "description": "Rust build, Cargo, and compilation error resolution specialist. Fixes Rust build errors with minimal changes.",
+      "mode": "subagent",
+      "prompt": "{file:prompts/agents/rust-build-resolver.txt}",
+      "tools": {
+        "read": true,
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
+    },
+    "explore": {
+      "disable": true
+    },
+    "general": {
+      "disable": true
+    }
+  },
+
+  "mcp": {
+    "servers": {
+      "semantic-scholar": {
+        "type": "local",
+        "command": ["npx", "-y", "@xbghc/semanticscholar-mcp"],
+        "environment": {
+          "SEMANTIC_SCHOLAR_API_KEY": "{env:SEMANTIC_SCHOLAR_API_KEY}"
+        },
+        "enabled": true
+      },
+      "duckdb": {
+        "type": "local",
+        "command": ["npx", "-y", "duckdb-mcp"],
+        "enabled": true
+      }
+    }
+  },
+
+  "lsp": true,
+  "plugins": ["@imythms/opencode-md-table-formatter", "@opencode-ai/plugin", "@opencode/cli", "@xbghc/semanticscholar-mcp", "duckdb-mcp", "opencode-agent-skills", "opencode-antigravity-auth", "opencode-autotitle", "opencode-browser", "opencode-personality", "opencode-research-papers", "opencode-websearch-cited", "opencode-workaholic"],
+  "provider": {
+    "opencode": {
+        "npm": "@ai-sdk/openai-compatible",
+        "name": "Free Claude Code",
+        "options": {
+            "baseURL": "http://127.0.0.1:8082/v1",
+            "apiKey": "{env:FCC_API_KEY}"
+        },
+        "models": {
+          "fable-5": "claude-fable-5",
+          "sonnet-4": "claude-sonnet-4-20250514",
+          "opus-4": "claude-opus-4-20250514",
+          "haiku-4": "claude-haiku-4-20250514"
+        }
+    }
+  }
+}
+
