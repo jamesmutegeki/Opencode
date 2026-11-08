@@ -1,3 +1,28 @@
+## 2026-11-08 — Fix agent halting, execution stalls, and tool timeouts
+
+Addressed repeated hangs where OpenCode and Claude Code would announce actions in text (e.g., "Now let me check the sizes...") and halt without executing tools, as well as command timeouts (120000 ms):
+
+1. **Anti-Stall & Continuous Execution rules added to `AGENTS.md`**:
+   - Forbids plain-text intent statements ("Let me do X", "I will now check Y") without emitting the tool call in the exact same turn. When agents emit text without tool calls, runtime harnesses interpret `finish_reason: "stop"` as yielding control to the user.
+   - Mandates continuous autonomous execution for diagnostic, inspection, and repair workflows until completion before returning to prompt.
+   - Directs agents to specify higher `timeout` parameters for long-running commands (builds, tests, indexing) instead of relying on the default 120,000 ms tool cutoff.
+   - WSL cross-filesystem efficiency: instructs agents never to run recursive tools (`du`, `find`) across `/mnt/c` or `/mnt/d` via the slow WSL 9P filesystem bridge; use native `powershell.exe` interop instead.
+   - Clarified Section 2 so agents do not misinterpret "pause and ask" as a reason to stall on read-only exploration and diagnostics.
+
+2. **Fixed Windows OpenCode PATH wrapper conflict**:
+   - `C:\Users\james\.opencode\src\tools\opencode.ps1` and `opencode.bat` were shadowing the real npm executable in User PATH and attempting to invoke a non-existent binary (`.../opencode-ai/bin/opencode.exe`) while force-injecting `deepseek-coder` overrides.
+   - Rewrote both wrappers to transparently proxy to the official OpenCode 2.x binary at `C:\Users\james\AppData\Roaming\npm\node_modules\@opencode\cli\bin\opencode.exe`.
+
+3. **Mirrored policy to Claude Code in WSL**:
+   - Appended identical Anti-Stall, Continuous Execution, and Cross-Filesystem rules to `~/.claude/CLAUDE.md`.
+
+Left deliberately unchanged:
+- The provider model in `~/.claude/settings.json` (`nemotron-3-ultra-550b-a55b`) is documented as a key latency contributor (~13.8 tok/s, 2m+ generation times); user instructed to switch models for high-throughput coding if needed.
+
+Verified:
+- `opencode --version` runs cleanly and outputs `opencode v2.2.1`.
+- `opencode debug config` validates without errors.
+
 ## 2026-10-29 — Fix opencode startup: v2 config schema, plugin loading, unauthenticated MCP
 
 opencode 2.2.1 refused to run. Three independent causes, all fixed:
